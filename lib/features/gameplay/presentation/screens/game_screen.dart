@@ -49,9 +49,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             const GameHud(),
 
             // ── Board ────────────────────────────────────────
-            const Expanded(
-              child: HexBoardWidget(),
-            ),
+            const Expanded(child: HexBoardWidget()),
 
             // ── Bottom Controls ──────────────────────────────
             _buildBottomControls(context),
@@ -139,7 +137,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           onNextLevel: levelIndex != null
               ? () {
                   Navigator.of(context).pop();
-                  ref.read(gameProvider.notifier).startInfiniteLevel(levelIndex + 1);
+                  ref
+                      .read(gameProvider.notifier)
+                      .startInfiniteLevel(levelIndex + 1);
                 }
               : null,
           onGoHome: () {

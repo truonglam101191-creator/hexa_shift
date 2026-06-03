@@ -56,4 +56,24 @@ void main() {
       expect(stopwatch.elapsedMilliseconds, lessThan(300));
     });
   });
+
+  group('3D Projection Math Tests', () {
+    test('Inverse projection restores original flat coordinate', () {
+      const double tiltCos = 0.866;
+      const double tiltSin = 0.500;
+      const double z = 12.0;
+      final originalPoint = Offset(100.0, 150.0);
+
+      // Project: y' = y * cos - z * sin
+      final projectedY = originalPoint.dy * tiltCos - z * tiltSin;
+      final projectedPoint = Offset(originalPoint.dx, projectedY);
+
+      // Inverse Project: y = (y' + z * sin) / cos
+      final restoredY = (projectedPoint.dy + z * tiltSin) / tiltCos;
+      final restoredPoint = Offset(projectedPoint.dx, restoredY);
+
+      expect(restoredPoint.dx, closeTo(originalPoint.dx, 0.001));
+      expect(restoredPoint.dy, closeTo(originalPoint.dy, 0.001));
+    });
+  });
 }
