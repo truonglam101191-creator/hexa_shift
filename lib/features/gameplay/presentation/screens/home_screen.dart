@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/three_d_widgets.dart';
 import '../providers/game_provider.dart';
 import 'game_screen.dart';
 
@@ -114,24 +115,12 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildCampaignCard(BuildContext context, WidgetRef ref, int currentLevel) {
-    return Container(
-      width: double.infinity,
+    return ThreeDCard(
+      color: AppColors.cardDark,
+      glowColor: AppColors.primary,
+      borderRadius: 24,
+      depth: 6,
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.cardDark,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 30,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -205,49 +194,69 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
-          // Play button (gradient)
-          GestureDetector(
-            onTap: () => _startCampaign(context, ref, currentLevel),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          Text(
+            'SELECT LEVEL TO PLAY:',
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.5,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          SizedBox(
+            height: 52,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: currentLevel,
+              itemBuilder: (context, index) {
+                final lvl = index + 1;
+                final isCurrent = lvl == currentLevel;
+                final isCompleted = lvl < currentLevel;
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: ThreeDLevelButton(
+                    label: '$lvl',
+                    isCurrent: isCurrent,
+                    isCompleted: isCompleted,
+                    onTap: () => _startCampaign(context, ref, lvl),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Play button (3D pressable)
+          ThreeDButton(
+            onPressed: () => _startCampaign(context, ref, currentLevel),
+            color: AppColors.primary,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 24,
                 ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.4),
-                    blurRadius: 15,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.play_arrow_rounded,
+                SizedBox(width: 8),
+                Text(
+                  'PLAY NOW',
+                  style: TextStyle(
                     color: Colors.white,
-                    size: 24,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.5,
                   ),
-                  SizedBox(width: 8),
-                  Text(
-                    'PLAY NOW',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -343,86 +352,59 @@ class _DifficultyCardState extends State<_DifficultyCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedScale(
-        scale: _isPressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-          decoration: BoxDecoration(
-            color: AppColors.glassFill,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: _isPressed
-                  ? _accentColor.withValues(alpha: 0.5)
-                  : AppColors.glassBorder,
-              width: 1,
+    return ThreeDButton(
+      color: AppColors.cardDark,
+      depthColor: Color.lerp(_accentColor, Colors.black, 0.4),
+      onPressed: widget.onTap,
+      borderRadius: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      child: Row(
+        children: [
+          // Icon
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _accentColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
             ),
-            boxShadow: _isPressed
-                ? [
-                    BoxShadow(
-                      color: _accentColor.withValues(alpha: 0.15),
-                      blurRadius: 20,
-                      spreadRadius: 1,
-                    ),
-                  ]
-                : null,
+            child: Icon(
+              _icon,
+              color: _accentColor,
+              size: 24,
+            ),
           ),
-          child: Row(
-            children: [
-              // Icon
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: _accentColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
+          const SizedBox(width: 16),
+          // Label & size
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.difficulty.label,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                child: Icon(
-                  _icon,
-                  color: _accentColor,
-                  size: 24,
+                const SizedBox(height: 2),
+                Text(
+                  widget.difficulty.sizeLabel,
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 12,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              // Label & size
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.difficulty.label,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      widget.difficulty.sizeLabel,
-                      style: TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Arrow
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: AppColors.textMuted,
-                size: 16,
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          // Arrow
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: AppColors.textMuted,
+            size: 16,
+          ),
+        ],
       ),
     );
   }

@@ -10,6 +10,9 @@ import 'features/gameplay/presentation/screens/home_screen.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Force Google Fonts to use local assets and disable dynamic HTTP fetching at runtime
+  GoogleFonts.config.allowRuntimeFetching = false;
+
   // Lock orientation to portrait for best hex grid display
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

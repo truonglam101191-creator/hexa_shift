@@ -165,6 +165,57 @@ class HexBoardPainter extends CustomPainter {
     // Draw the 3D block & arrow sliding
     _draw3DHexPrism(canvas, currentCenter, _baseHeight, direction, false, opacity);
     _drawArrow3D(canvas, currentCenter, _baseHeight, direction, false, opacity);
+
+    // Draw trail and explosion particles
+    _drawParticleSparks(canvas, currentCenter, direction, opacity);
+  }
+
+  /// Draws trail and clear explosion particles for the sliding tile.
+  void _drawParticleSparks(
+    Canvas canvas,
+    Offset center2D,
+    ArrowDirection direction,
+    double opacity,
+  ) {
+    final dirIndex = direction.colorIndex;
+    final sparkColor = AppColors.tileGlowForDirection(dirIndex);
+
+    // 1. Trail Particles (glowing dots behind the movement direction)
+    final movementAngle = direction.arrowAngle + pi; // Opposite direction
+    final trailCount = 3;
+    final trailPaint = Paint()..style = PaintingStyle.fill;
+
+    for (var i = 1; i <= trailCount; i++) {
+      final double distance = radius * 0.4 * i * (1.0 - moveAnimationValue);
+      final trailOffsetFlat = Offset(
+        center2D.dx + cos(movementAngle) * distance,
+        center2D.dy + sin(movementAngle) * distance,
+      );
+      final trailOffset3D = _project(trailOffsetFlat, _baseHeight + 2.0);
+
+      trailPaint.color = sparkColor.withValues(alpha: opacity * (1.0 - (i / (trailCount + 1))) * 0.6);
+      canvas.drawCircle(trailOffset3D, 3.0 * (1.0 - moveAnimationValue), trailPaint);
+    }
+
+    // 2. Clear Explosion (Sparks expanding outwards in the second half of the animation)
+    if (moveAnimationValue > 0.3) {
+      final double explodeProgress = (moveAnimationValue - 0.3) / 0.7; // 0.0 to 1.0
+      final sparkPaint = Paint()..style = PaintingStyle.fill;
+      final int sparkCount = 6;
+
+      for (var i = 0; i < sparkCount; i++) {
+        final double angle = (i * 2 * pi) / sparkCount + (explodeProgress * 0.5); // Add rotation sway
+        final double distance = radius * (0.3 + explodeProgress * 1.2);
+        final sparkOffsetFlat = Offset(
+          center2D.dx + cos(angle) * distance,
+          center2D.dy + sin(angle) * distance,
+        );
+        final sparkOffset3D = _project(sparkOffsetFlat, _baseHeight + 2.0);
+
+        sparkPaint.color = sparkColor.withValues(alpha: (1.0 - explodeProgress) * 0.95 * opacity);
+        canvas.drawCircle(sparkOffset3D, 2.5 * (1.0 - explodeProgress), sparkPaint);
+      }
+    }
   }
 
   /// Renders the extruded 3D hex block with drop shadows, Southern side walls, and shaded lighting.

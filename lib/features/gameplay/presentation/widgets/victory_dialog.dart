@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/three_d_widgets.dart';
 
 /// Victory celebration dialog shown when all tiles are cleared.
 ///
@@ -54,10 +55,7 @@ class _VictoryDialogState extends State<VictoryDialog>
       curve: Curves.elasticOut,
     );
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _controller.forward();
   }
@@ -83,30 +81,14 @@ class _VictoryDialogState extends State<VictoryDialog>
       },
       child: Dialog(
         backgroundColor: Colors.transparent,
-        child: Container(
+        child: ThreeDCard(
+          color: AppColors.cardDark,
+          depthColor: AppColors.surfaceDark,
+          borderRadius: 28,
+          depth: 8,
+          borderColor: AppColors.primaryGlow,
+          glowColor: AppColors.primary,
           padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.cardDark.withValues(alpha: 0.95),
-                AppColors.surfaceDark.withValues(alpha: 0.95),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: AppColors.primaryGlow,
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                blurRadius: 40,
-                spreadRadius: 5,
-              ),
-            ],
-          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -199,7 +181,9 @@ class _VictoryDialogState extends State<VictoryDialog>
                   const SizedBox(width: 16),
                   // Play Again / Next Level button
                   _VictoryButton(
-                    label: widget.levelIndex != null ? 'Next Level' : 'Play Again',
+                    label: widget.levelIndex != null
+                        ? 'Next Level'
+                        : 'Play Again',
                     icon: widget.levelIndex != null
                         ? Icons.arrow_forward_rounded
                         : Icons.refresh_rounded,
@@ -234,46 +218,30 @@ class _VictoryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          decoration: BoxDecoration(
-            gradient: isPrimary
-                ? const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryLight],
-                  )
-                : null,
-            color: isPrimary ? null : AppColors.glassFill,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isPrimary ? AppColors.primary : AppColors.glassBorder,
-              width: 1,
+    return ThreeDButton(
+      onPressed: onPressed,
+      color: isPrimary ? AppColors.primary : AppColors.cardDark,
+      borderRadius: 16,
+      depth: 4,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: isPrimary ? Colors.white : AppColors.textSecondary,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: isPrimary ? Colors.white : AppColors.textSecondary,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                color: isPrimary ? Colors.white : AppColors.textSecondary,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isPrimary ? Colors.white : AppColors.textSecondary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }

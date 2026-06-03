@@ -60,10 +60,11 @@ class _HexBoardWidgetState extends ConsumerState<HexBoardWidget>
     final gameState = ref.watch(gameProvider);
     final board = gameState.board;
 
-    // Listen to changes in the game state to trigger move animations
+    // Listen to changes in the game state to trigger move animations and tactile feedback
     ref.listen<GameState>(gameProvider, (prev, next) {
       if (next.lastMoveEvents.isNotEmpty) {
         _moveController.forward(from: 0.0);
+        HapticFeedback.mediumImpact();
       }
     });
 

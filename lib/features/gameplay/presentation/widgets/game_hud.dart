@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/three_d_widgets.dart';
 import '../providers/game_provider.dart';
 
 /// Heads-up display showing move count and undo/redo controls.
@@ -14,29 +16,24 @@ class GameHud extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gameState = ref.watch(gameProvider);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.glassFill,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.glassBorder, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: ThreeDCard(
+        color: AppColors.cardDark,
+        borderRadius: 20,
+        depth: 5,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Undo button
           _HudIconButton(
             icon: Icons.undo_rounded,
             onPressed: gameState.canUndo
-                ? () => ref.read(gameProvider.notifier).undo()
+                ? () {
+                    HapticFeedback.lightImpact();
+                    ref.read(gameProvider.notifier).undo();
+                  }
                 : null,
             tooltip: 'Undo',
           ),
@@ -109,14 +106,18 @@ class GameHud extends ConsumerWidget {
           _HudIconButton(
             icon: Icons.redo_rounded,
             onPressed: gameState.canRedo
-                ? () => ref.read(gameProvider.notifier).redo()
+                ? () {
+                    HapticFeedback.lightImpact();
+                    ref.read(gameProvider.notifier).redo();
+                  }
                 : null,
             tooltip: 'Redo',
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 /// A glassmorphism-styled icon button for the HUD.
@@ -139,36 +140,36 @@ class _HudIconButton extends StatelessWidget {
       message: tooltip,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
-        opacity: isEnabled ? 1.0 : 0.3,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isEnabled
-                    ? AppColors.glassFill
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isEnabled
-                      ? AppColors.glassBorder
-                      : Colors.transparent,
-                  width: 1,
+        opacity: isEnabled ? 1.0 : 0.35,
+        child: isEnabled
+            ? ThreeDButton(
+                onPressed: onPressed!,
+                color: AppColors.cardDark,
+                borderRadius: 12,
+                depth: 3,
+                padding: const EdgeInsets.all(10),
+                child: Icon(
+                  icon,
+                  color: AppColors.textPrimary,
+                  size: 22,
+                ),
+              )
+            : Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    width: 1,
+                  ),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.textMuted,
+                  size: 22,
                 ),
               ),
-              child: Icon(
-                icon,
-                color: isEnabled
-                    ? AppColors.textPrimary
-                    : AppColors.textMuted,
-                size: 22,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
