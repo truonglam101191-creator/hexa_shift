@@ -7,67 +7,75 @@ import '../../../../core/constants/app_constants.dart';
 import '../providers/game_provider.dart';
 import 'game_screen.dart';
 
-/// Home screen with difficulty selection and premium dark UI.
-///
-/// Features gradient title, glassmorphism difficulty cards,
-/// and smooth page transitions.
+/// Home screen with Campaign Mode and practice selection.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final gameState = ref.watch(gameProvider);
+    final currentLevel = gameState.unlockedCampaignLevel;
+
     return Scaffold(
       backgroundColor: AppColors.scaffoldDark,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
 
-              // ── Game Title ─────────────────────────────────────
-              _buildTitle(),
+                // ── Game Title ─────────────────────────────────────
+                _buildTitle(),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
-              // ── Subtitle ───────────────────────────────────────
-              Text(
-                'Clear all tiles by shifting them\nalong their arrows',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-              ),
-
-              const Spacer(flex: 2),
-
-              // ── Difficulty Cards ───────────────────────────────
-              Text(
-                'SELECT DIFFICULTY',
-                style: TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 3,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              ...Difficulty.values.map(
-                (d) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _DifficultyCard(
-                    difficulty: d,
-                    onTap: () => _startGame(context, ref, d),
+                // ── Subtitle ───────────────────────────────────────
+                Text(
+                  'Clear all tiles by shifting them\nalong their arrows',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                    height: 1.5,
                   ),
                 ),
-              ),
 
-              const Spacer(flex: 3),
-            ],
+                const SizedBox(height: 36),
+
+                // ── Campaign Mode Card ──────────────────────────────
+                _buildCampaignCard(context, ref, currentLevel),
+
+                const SizedBox(height: 36),
+
+                // ── Practice Mode Title ─────────────────────────────
+                Text(
+                  'PRACTICE MODE',
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 3,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                ...Difficulty.values.map(
+                  (d) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _DifficultyCard(
+                      difficulty: d,
+                      onTap: () => _startGame(context, ref, d),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
@@ -101,6 +109,174 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCampaignCard(BuildContext context, WidgetRef ref, int currentLevel) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.cardDark,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            blurRadius: 30,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Banner row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.emoji_events_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'CAMPAIGN MODE',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.tileUp.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Infinite levels',
+                  style: TextStyle(
+                    color: AppColors.tileUp,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Level status
+          Text(
+            'Level $currentLevel',
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Challenge yourself with solvable, procedurally generated puzzles that scale in difficulty.',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Play button (gradient)
+          GestureDetector(
+            onTap: () => _startCampaign(context, ref, currentLevel),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.4),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'PLAY NOW',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startCampaign(BuildContext context, WidgetRef ref, int levelIndex) {
+    HapticFeedback.mediumImpact();
+    ref.read(gameProvider.notifier).startInfiniteLevel(levelIndex);
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const GameScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.05),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOut,
+              )),
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 400),
       ),
     );
   }

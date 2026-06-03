@@ -15,6 +15,8 @@ class GameState {
     this.selectedTile,
     this.validMoves = const [],
     this.lastMoveEvents = const [],
+    this.levelIndex,
+    this.unlockedCampaignLevel = 1,
   });
 
   /// The current board state.
@@ -44,6 +46,13 @@ class GameState {
   /// Events from the last move (for animation sequencing).
   final List<MoveEvent> lastMoveEvents;
 
+  /// The level number if playing Campaign/Infinite Mode (1-based).
+  /// Null if playing in custom Sandbox/Practice Mode.
+  final int? levelIndex;
+
+  /// The highest unlocked level in Campaign/Infinite Mode (1-based).
+  final int unlockedCampaignLevel;
+
   /// Whether the player can undo.
   bool get canUndo => moveHistory.isNotEmpty;
 
@@ -62,6 +71,9 @@ class GameState {
     bool clearSelectedTile = false,
     List<HexTile>? validMoves,
     List<MoveEvent>? lastMoveEvents,
+    int? levelIndex,
+    bool clearLevelIndex = false,
+    int? unlockedCampaignLevel,
   }) {
     return GameState(
       board: board ?? this.board,
@@ -73,6 +85,8 @@ class GameState {
       selectedTile: clearSelectedTile ? null : (selectedTile ?? this.selectedTile),
       validMoves: validMoves ?? this.validMoves,
       lastMoveEvents: lastMoveEvents ?? this.lastMoveEvents,
+      levelIndex: clearLevelIndex ? null : (levelIndex ?? this.levelIndex),
+      unlockedCampaignLevel: unlockedCampaignLevel ?? this.unlockedCampaignLevel,
     );
   }
 }

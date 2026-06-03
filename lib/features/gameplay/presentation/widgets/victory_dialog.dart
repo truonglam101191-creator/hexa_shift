@@ -12,6 +12,8 @@ class VictoryDialog extends StatefulWidget {
     required this.moveCount,
     required this.onPlayAgain,
     required this.onGoHome,
+    this.levelIndex,
+    this.onNextLevel,
   });
 
   /// Total number of moves taken to win.
@@ -22,6 +24,12 @@ class VictoryDialog extends StatefulWidget {
 
   /// Callback when "Home" is tapped.
   final VoidCallback onGoHome;
+
+  /// Active level index (null if practice mode).
+  final int? levelIndex;
+
+  /// Callback when "Next Level" is tapped.
+  final VoidCallback? onNextLevel;
 
   @override
   State<VictoryDialog> createState() => _VictoryDialogState();
@@ -128,9 +136,11 @@ class _VictoryDialogState extends State<VictoryDialog>
                 shaderCallback: (bounds) => const LinearGradient(
                   colors: [AppColors.primary, AppColors.tileUp],
                 ).createShader(bounds),
-                child: const Text(
-                  'PUZZLE SOLVED!',
-                  style: TextStyle(
+                child: Text(
+                  widget.levelIndex != null
+                      ? 'LEVEL ${widget.levelIndex} SOLVED!'
+                      : 'PUZZLE SOLVED!',
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -187,11 +197,15 @@ class _VictoryDialogState extends State<VictoryDialog>
                     isPrimary: false,
                   ),
                   const SizedBox(width: 16),
-                  // Play Again button
+                  // Play Again / Next Level button
                   _VictoryButton(
-                    label: 'Play Again',
-                    icon: Icons.refresh_rounded,
-                    onPressed: widget.onPlayAgain,
+                    label: widget.levelIndex != null ? 'Next Level' : 'Play Again',
+                    icon: widget.levelIndex != null
+                        ? Icons.arrow_forward_rounded
+                        : Icons.refresh_rounded,
+                    onPressed: widget.levelIndex != null
+                        ? widget.onNextLevel!
+                        : widget.onPlayAgain,
                     isPrimary: true,
                   ),
                 ],

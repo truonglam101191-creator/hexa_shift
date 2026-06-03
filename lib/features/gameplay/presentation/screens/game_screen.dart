@@ -30,7 +30,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       if (next.status == GameStatus.won && !_victoryShown) {
         _victoryShown = true;
         HapticFeedback.heavyImpact();
-        _showVictoryDialog(next.moveCount);
+        _showVictoryDialog(next.moveCount, next.levelIndex);
       }
       if (next.status == GameStatus.playing) {
         _victoryShown = false;
@@ -64,6 +64,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   }
 
   Widget _buildTopBar(BuildContext context) {
+    final gameState = ref.watch(gameProvider);
+    final titleText = gameState.levelIndex != null
+        ? 'LEVEL ${gameState.levelIndex}'
+        : 'HEXA SHIFT';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -80,9 +85,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             shaderCallback: (bounds) => const LinearGradient(
               colors: [AppColors.primary, AppColors.tileUp],
             ).createShader(bounds),
-            child: const Text(
-              'HEXA SHIFT',
-              style: TextStyle(
+            child: Text(
+              titleText,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
@@ -117,7 +122,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  void _showVictoryDialog(int moveCount) {
+  void _showVictoryDialog(int moveCount, int? levelIndex) {
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
       showDialog(
@@ -126,10 +131,17 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         barrierColor: Colors.black54,
         builder: (_) => VictoryDialog(
           moveCount: moveCount,
+          levelIndex: levelIndex,
           onPlayAgain: () {
             Navigator.of(context).pop();
             ref.read(gameProvider.notifier).resetLevel();
           },
+          onNextLevel: levelIndex != null
+              ? () {
+                  Navigator.of(context).pop();
+                  ref.read(gameProvider.notifier).startInfiniteLevel(levelIndex + 1);
+                }
+              : null,
           onGoHome: () {
             Navigator.of(context).pop(); // Close dialog
             Navigator.of(context).pop(); // Go back to home

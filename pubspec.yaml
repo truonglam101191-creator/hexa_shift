@@ -41,6 +41,9 @@ dependencies:
   # Premium typography
   google_fonts: ^6.2.1
 
+  # Local persistence
+  shared_preferences: ^2.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
